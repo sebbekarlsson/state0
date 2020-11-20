@@ -1,6 +1,6 @@
 {
   "name": "state0",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "state management",
   "main": "dist/bundle.js",
   "directories": {
@@ -33,5 +33,7 @@
     "typescript": "^4.1.2",
     "webpack-cli": "^4.2.0"
   },
-  "types": "./lib/src/types.d.ts"
+  "types": "./lib/src/types.d.ts",
+  "repository": "https://github.com/sebbekarlsson/state0",
+  "website": "https://github.com/sebbekarlsson/state0"
 }
