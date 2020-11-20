@@ -33,7 +33,7 @@ dispatcher.when(
 );
 
 // this one just logs the new state,
-// to be used in a react component for eample.
+// to be used in a react component for example.
 dispatcher.when(
   updateUserAction(SOME_RANDOM_USER_ID),
   (prevState: IUser, nextState: IUser) => {
