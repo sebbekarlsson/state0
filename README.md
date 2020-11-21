@@ -8,7 +8,9 @@
 </p>
 
 ## Example
+
 > Minimal example for how to use `state0`
+
 ```typescript
 import { Dispatcher } from "state0";
 
@@ -52,14 +54,19 @@ dispatcher.emit(updateUserAction(SOME_RANDOM_USER_ID), {
   email: "john.doe@doecompanyforever.com",
 });
 ```
+
 ## Using it with React
+
 > [Click here](REACT.md)
 
 ## Documentation
+
 > [How to use it](DOCS.md)
 
 ## Installation
+
 > To install run
+
 ```bash
 yarn install state0
 
@@ -67,7 +74,9 @@ yarn install state0
 
 npm install state0
 ```
+
 > Then you are ready to use it:
+
 ```typescript
 import { Dispatcher } from "state0";
 ```

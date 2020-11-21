@@ -1,5 +1,7 @@
 # state0 with React
+
 > Here's what this could look like when using in practive:
+
 ```typescript
 import React, { FC, useState, useCallback } from "react";
 import { dispatcher } from "./store";
@@ -30,11 +32,13 @@ export const App = withState0(
   CONTAINER_CLICKER_AMOUNT
 );
 ```
+
 > Obviously there is more to it than what meets the eyes here.  
 > First of all, this `withState0` is a function which is not included in this library.  
 > However, here is a snippet that you can just copy-paste into your project:
+
 ```typescript
-import React, { FC, useState } from 'react';
+import React, { FC, useState } from "react";
 import { Dispatcher } from "state0";
 import { IAppProps } from "../types"; // you have to change this
 
@@ -55,5 +59,6 @@ export const withState0 = (
   return ComponentWrapper;
 };
 ```
+
 > For a full example of using `state0` with React,  
 > [Click here](https://github.com/sebbekarlsson/state0-react-example)

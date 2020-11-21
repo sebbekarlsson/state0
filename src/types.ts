@@ -7,5 +7,5 @@ export interface IDispatcher {
   [x: string]: {
     state: any;
     when: FWhen;
-  }
+  };
 }
