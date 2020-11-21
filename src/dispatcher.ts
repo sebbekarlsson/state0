@@ -66,12 +66,11 @@ export class Dispatcher<T> {
                     this.search(`${stateEvent}/init`) ||
                     prev[stateEvent],
                   payload
-                ) ||
-                prev[stateEvent],
+                ) || prev[stateEvent],
             }),
             this.prevState
           )
-        : this.prevState; 
+        : this.prevState;
 
     const emitResult = this.finishEmit({
       ...this.state,
@@ -89,22 +88,20 @@ export class Dispatcher<T> {
 
     // broadcast to all readers
     stateEvent in this.ons
-        ? (this.ons[stateEvent] || []).reduce(
-        (prev, then) => ({
-          ...prev,
-          [stateEvent]:
-            then(
-              (stateEvent in this.prevState &&
-                this.prevState[stateEvent]) ||
-                this.search(`${stateEvent}/init`) ||
-                prev[stateEvent],
-              this.search(`${stateEvent}`)
-            ) ||
-            prev[stateEvent],
-        }),
-        this.prevState
-      )
-    : this.prevState;
+      ? (this.ons[stateEvent] || []).reduce(
+          (prev, then) => ({
+            ...prev,
+            [stateEvent]:
+              then(
+                (stateEvent in this.prevState && this.prevState[stateEvent]) ||
+                  this.search(`${stateEvent}/init`) ||
+                  prev[stateEvent],
+                this.search(`${stateEvent}`)
+              ) || prev[stateEvent],
+          }),
+          this.prevState
+        )
+      : this.prevState;
 
     return emitResult;
   }
