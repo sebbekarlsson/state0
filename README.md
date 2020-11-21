@@ -22,7 +22,7 @@ export interface IUser {
   password: string;
 }
 
-const dispatcher = new Dispatcher((state) => {
+const dispatcher = new Dispatcher<IUser>((state) => {
   // Store the state wherever you want, state0 couldn't care less.
   // The state always exists in dispatcher.state however.
   console.log(state); // // { user: { abc123: { email: 'john.doe@doecompanyforever.com' } } }
