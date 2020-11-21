@@ -1,35 +1,10 @@
 import { TStateEvent, FThen } from "./types";
-
-const checkPath = (stateEvent: string) => {
-  if (!stateEvent) {
-    throw new Error("Cannot pass an empty stateEvent / path");
-  }
-
-  if (!stateEvent.includes("/")) {
-    throw new Error("stateEvent / path needs at least one level of depth.");
-  }
-
-  if (stateEvent[stateEvent.length - 1] === "/") {
-    throw new Error("stateEvent / path cannot end with `/`");
-  }
-};
-
-const getPathElements = (stateEvent: string): string[] => {
-  checkPath(stateEvent);
-  return stateEvent.split("/");
-};
-
-const applyValue = (breadCrumbs: any[]): { [x: string]: any } => {
-  return {
-    [breadCrumbs.pop()]:
-      breadCrumbs.length == 1 ? breadCrumbs[0] : applyValue(breadCrumbs),
-  };
-};
-
-const resolveObjectPath = (path: string, obj: any, separator = "/") => {
-  var properties = Array.isArray(path) ? path : path.split(separator);
-  return properties.reduce((prev, curr) => prev && prev[curr], obj);
-};
+import {
+  checkPath,
+  getPathElements,
+  applyValue,
+  resolveObjectPath,
+} from "./utils";
 
 export class Dispatcher<T> {
   listeners: { [x: string]: FThen[] };
