@@ -10,7 +10,6 @@
 ## Example
 
 > Minimal example for how to use `state0`  
-> (Implemented as a unit-test)
 
 ```typescript
 import { IQueue, makeQueue, queueDispatch } from "@state0";
