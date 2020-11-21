@@ -4,7 +4,7 @@
 ## Example
 > Minimal example for how to use `state0`
 ```typescript
-import { Dispatcher } from "@state0";
+import { Dispatcher } from "state0";
 
 const SOME_RANDOM_USER_ID = "abc123";
 
@@ -46,6 +46,8 @@ dispatcher.emit(updateUserAction(SOME_RANDOM_USER_ID), {
   email: "john.doe@doecompanyforever.com",
 });
 ```
+## Using it with React
+> [Click here](REACT.md)
 ## Installation
 > To install run
 ```bash
@@ -57,5 +59,5 @@ npm install state0
 ```
 > Then you are ready to use it:
 ```typescript
-import { Dispatcher } from "@state0";
+import { Dispatcher } from "state0";
 ```

@@ -3,6 +3,9 @@ export declare class Dispatcher<T> {
     listeners: {
         [x: string]: FThen[];
     };
+    ons: {
+        [x: string]: FThen[];
+    };
     prevState: {
         [x: string]: Partial<T>;
     };
@@ -18,9 +21,12 @@ export declare class Dispatcher<T> {
     constructor(onStateChange?: (state: {
         [x: string]: any;
     }) => any);
-    when(stateEvent: TStateEvent, then: FThen): void;
+    when(stateEvent: TStateEvent, then: FThen): FThen;
+    on(stateEvent: TStateEvent, then: FThen): FThen;
     emit(stateEvent: TStateEvent, payload: Partial<T>): any;
     finishEmit(nextState: {
         [x: string]: any;
     }): any;
+    search(path: string): any;
+    setInitialState(path: string, state: any): void;
 }

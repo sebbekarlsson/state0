@@ -1,6 +1,6 @@
 {
   "name": "state0",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "state management",
   "main": "dist/bundle.js",
   "directories": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "mocha -r ts-node/register tests/**/*.test.ts",
-    "build": "yarn run webpack && yarn run tsc"
+    "build": "rm -rf dist; rm -rf lib; yarn run webpack && yarn run tsc && cp -r ./lib/src/*.d.ts dist/. && cp -r ./lib/src/*.js dist/."
   },
   "keywords": [
     "state",
@@ -33,7 +33,6 @@
     "typescript": "^4.1.2",
     "webpack-cli": "^4.2.0"
   },
-  "types": "./lib/src/types.d.ts",
   "repository": "https://github.com/sebbekarlsson/state0",
   "website": "https://github.com/sebbekarlsson/state0"
 }
