@@ -1,5 +1,11 @@
-# state0
-> The ignorant state management library
+<p align="center" style='text-align: center; width: 100%;'>
+  <img src="./state0.png" />
+
+</p>  
+  
+<p align="center" style='text-align: center; width: 100%;'>
+  The ignorant state management library
+</p>
 
 ## Example
 > Minimal example for how to use `state0`
@@ -34,7 +40,7 @@ dispatcher.when(
 
 // this one just logs the new state,
 // to be used in a react component for example.
-dispatcher.when(
+dispatcher.on(
   updateUserAction(SOME_RANDOM_USER_ID),
   (prevState: IUser, nextState: IUser) => {
     console.log(nextState); // { email: 'john.doe@doecompanyforever.com' }
@@ -48,6 +54,10 @@ dispatcher.emit(updateUserAction(SOME_RANDOM_USER_ID), {
 ```
 ## Using it with React
 > [Click here](REACT.md)
+
+## Documentation
+> [How to use it](DOCS.md)
+
 ## Installation
 > To install run
 ```bash
