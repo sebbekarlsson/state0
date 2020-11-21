@@ -14,3 +14,8 @@ export declare const applyValue: (breadCrumbs: any[]) => {
  * some.value.in.object
  */
 export declare const resolveObjectPath: (path: string, obj: any, separator?: string) => any;
+export declare const uniqueByKey: <T>(arr: (T & {
+    [x: string]: any;
+})[], key: string | number) => (T & {
+    [x: string]: any;
+})[];

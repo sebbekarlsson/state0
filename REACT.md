@@ -1,36 +1,51 @@
 # state0 with React
 
-> Here's what this could look like when using in practive:
+> Here's what this could look like when using in practice:
 
 ```typescript
-import React, { FC, useState, useCallback } from "react";
-import { dispatcher } from "./store";
+import React, { FC, useMemo } from "react";
 import "./App.css";
 import { IAppProps } from "./types";
-import { CONTAINER_CLICKER_AMOUNT } from "./store/containers";
 import { withState0 } from "./store/with";
+import prettyFormat from "pretty-format";
+import { queue } from "./store";
+import { ACTION_CLICK_INCREASE } from "./store/actionTypes";
+import { queueDispatch } from "state0";
 
 const AppComponent: FC<IAppProps> = ({ amount }): JSX.Element => {
-  const handleClick = useCallback(() => {
-    dispatcher.emit(CONTAINER_CLICKER_AMOUNT, { amount: 1 });
-  }, [dispatcher]);
+  const handleClick = () => {
+    queueDispatch(queue, {
+      type: ACTION_CLICK_INCREASE,
+      payload: { amount: 1 },
+    });
+  };
+
+  const state = queue.state;
+  const raw = useMemo(() => state && prettyFormat(queue), [state]);
+
   return (
-    <div>
+    <div className="wrapper">
       <section>
         <button onClick={handleClick}>Press Me</button>
       </section>
       <section>
         <p>You have pressed me {amount} times.</p>
       </section>
+      {raw && (
+        <section>
+          <i
+            style={{ marginTop: "1rem", display: "block", fontSize: "0.8rem" }}
+          >
+            What it looks like inside
+          </i>
+          <pre className="textarea">{raw}</pre>
+        </section>
+      )}
     </div>
   );
 };
 
-export const App = withState0(
-  dispatcher,
-  AppComponent,
-  CONTAINER_CLICKER_AMOUNT
-);
+export const App = withState0(queue, AppComponent, ACTION_CLICK_INCREASE);
 ```
 
 > Obviously there is more to it than what meets the eyes here.  
@@ -39,19 +54,20 @@ export const App = withState0(
 
 ```typescript
 import React, { FC, useState } from "react";
-import { Dispatcher } from "state0";
-import { IAppProps } from "../types"; // you have to change this
+import { queueSubscribe, IQueue } from "state0";
+import { IAppProps, IToastState } from "../types"; // you have to change these
 
 export const withState0 = (
-  dispatcher: Dispatcher<IAppProps>,
+  queue: IQueue<IAppProps | IToastState>,
   Component: FC<any>,
   path: string
 ) => {
   const ComponentWrapper: FC<any> = (): JSX.Element => {
     const [props, setProps] = useState({});
-    dispatcher.on(path, (_, nextState: any) => {
-      setProps(nextState);
-    });
+    const subscriber = (data: any) => {
+      setProps({ ...props, ...data });
+    };
+    queueSubscribe(queue, [{ type: path, trigger: subscriber }]);
     Component.defaultProps = props;
     return <Component props={props} />;
   };

@@ -4,95 +4,58 @@
 > for demonstrational purposes.  
 > You should use your own type definitions for these generics.
 
-## Dispatcher
+## Queue
+
+> To create the queue, use `makeQueue<T>(reducers: IReducer[], initialState:T, actions: IAction[], subscriber: ISubscriber[])`  
+> Note that the `actions` should usually be passed as empty `[]`, it is only for rare occations  
+> when you want to initialize the queue with some initial actions (very rarely).
 
 ```typescript
-import { Dispatcher } from "state0";
+import { queue } from "state0";
 
 // instead of "any", you can use your own type / interface.
 // For example, maybe your dispatcher takes care of multiple states,
 // you can use (IUserState | INotesState | ISettingsState) instead of "any".
-export const dispatcher = new Dispatcher<any>();
+export const queue = makeQueue<any>([clickReducer], initialState, [], []);
 ```
 
-## Initial state
+## Emit / Dispatch
+
+> Events can be dispatched using `queueDispatch(queue: IQueue<T>, IAction<T>)`
 
 ```typescript
-dispatcher.setInitialState("path/to/state", { someValue: 42 });
-// the code above will be reduced inside the dispatcher (dispatcher.state)
-// to the following:
-
-/*
- * {
- *   path: {
- *     to: {
- *       state: {
- *         someValue: 42
- *       }
- *     }
- *   }
- * }
- */
+queueDispatch(queue, { type: ACTION_CLICK_INCREASE, payload: { amount: 1 } });
 ```
 
-> This `setInitialState` method also produces a side-effect,  
-> It will emit the following event:
+## Subscribe
 
-```json
-["/path/to/state/init", { "someValue": 42 }]
-```
-
-> And then it is up to _you_ to catch this event.  
-> This can be done like this:
+> To subscribe on an event, use `queueSubscribe(queue: IQueue<T>, ISubscriber<T>[])`
 
 ```typescript
-// catching the initial state event and returning it.
-// returning it inside a "when" - action will update the state.
-const initialStateAction = (prevState: IAppProps, nextState: IAppProps) => {
-  dispatcher.emit("path/to/state", nextState);
-  return nextState;
+export const clickSubscriber = {
+  type: CLICK_ACTION,
+  trigger: (data: IClickState) => {
+    console.log(`Just received some data ${data}`);
+  },
 };
 
-dispatcher.when("/path/to/state/init", initialStateAction);
+queueSubscribe(queue, [clickSubscriber]);
 ```
 
-## Emit
+## Reducing
 
-> Events can be dispatched using `dispatcher.emit(path: string, payload: T)`
-
-```typescript
-dispatcher.emit("/path/to/state", { someValue: 16 });
-```
-
-## When
-
-> The `when(path: string, (prevState: T, nextState:T) => any)` method is used to listen  
-> for an event, and also to return the next state.  
-> As mentioned before, whatever you return from this `when` method, will be reduced  
-> into the state.
+> Reducers are added when calling `makeQueue` (as mentioned at the top of this page).  
+> You can pass a reducer to it like this:
 
 ```typescript
-// catching an event and returning a new modified state.
-const initialStateAction = (prevState: IAppProps, nextState: IAppProps) => {
-  return { ...nextState, someValue: 13 };
+export const clickReducer = {
+  type: CLICK_ACTION,
+  trigger: (prevState: IClickState, nextState: IClickState): IClickState => {
+    return { amount: prevState.amount + nextState.amount };
+  },
 };
 
-dispatcher.when("/path/to/state", initialStateAction);
-```
-
-## On
-
-> The `on(path: string, (prevState: T, nextState:T) => any)` should be used when  
-> you are only interested in reading data from a dispatched action/event,  
-> returning anything here will _not_ update the state.
-
-```typescript
-// catching an event (read-only)
-const initialStateAction = (prevState: IAppProps, nextState: IAppProps) => {
-  console.log(nextState);
-};
-
-dispatcher.when("/path/to/state", initialStateAction);
+export const queue = makeQueue<any>([clickReducer], initialState, [], []);
 ```
 
 ### Final Notes

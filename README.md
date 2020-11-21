@@ -9,50 +9,53 @@
 
 ## Example
 
-> Minimal example for how to use `state0`
+> Minimal example for how to use `state0`  
+> (Implemented as a unit-test)
 
 ```typescript
-import { Dispatcher } from "state0";
+import { IQueue, makeQueue, queueDispatch } from "@state0";
 
-const SOME_RANDOM_USER_ID = "abc123";
+const CLICK_ACTION = "CLICK_ACTION";
 
-export interface IUser {
-  username: string;
-  email: string;
-  password: string;
+export interface IClickState {
+  amount: number;
 }
 
-const dispatcher = new Dispatcher<IUser>((state) => {
-  // Store the state wherever you want, state0 couldn't care less.
-  // The state always exists in dispatcher.state however.
-  console.log(state); // // { user: { abc123: { email: 'john.doe@doecompanyforever.com' } } }
-});
+export const initialState: IClickState = {
+  amount: 0,
+};
 
-// define some action types
-const updateUserAction = (userId: string) => `user/${userId}/update`;
+export const clickSubscriber = {
+  type: CLICK_ACTION,
+  trigger: (data: IClickState) => {
+    console.log(`Just received some data ${data}`);
+  },
+};
 
-// listen for updates
-// this one actually returns a modified state.
-dispatcher.when(
-  updateUserAction(SOME_RANDOM_USER_ID),
-  (prevState: IUser, nextState: IUser) => {
-    return { ...prevState, ...nextState };
-  }
+export const clickReducer = {
+  type: CLICK_ACTION,
+  trigger: (prevState: IClickState, nextState: IClickState): IClickState => {
+    return { amount: prevState.amount + nextState.amount };
+  },
+};
+
+const simulateClick = (queue: IQueue<IClickState>) =>
+  queueDispatch<IClickState>(queue, {
+    type: CLICK_ACTION,
+    payload: { amount: 1 },
+  });
+
+const queue = makeQueue<IClickState>(
+  [clickReducer],
+  initialState,
+  [],
+  [clickSubscriber]
 );
 
-// this one just logs the new state,
-// to be used in a react component for example.
-dispatcher.on(
-  updateUserAction(SOME_RANDOM_USER_ID),
-  (prevState: IUser, nextState: IUser) => {
-    console.log(nextState); // { email: 'john.doe@doecompanyforever.com' }
-  }
-);
-
-// emit an event
-dispatcher.emit(updateUserAction(SOME_RANDOM_USER_ID), {
-  email: "john.doe@doecompanyforever.com",
-});
+simulateClick(queue); // { amount: 1 }
+simulateClick(queue); // { amount: 2 }
+simulateClick(queue); // { amount: 3 }
+simulateClick(queue); // { amount: 4 }
 ```
 
 ## Using it with React

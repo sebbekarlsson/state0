@@ -1,11 +1,22 @@
-export type TStateEvent = string;
-export type FWhen = <T>(stateEvent: TStateEvent) => Promise<T>;
-export type FThen = (prevState: any, state: any) => any;
-export type FEmit = (stateEvent: TStateEvent, state: any) => any;
+export interface IAction<T> {
+  type: string;
+  payload: T;
+}
 
-export interface IDispatcher {
-  [x: string]: {
-    state: any;
-    when: FWhen;
-  };
+export interface IReducer<T> {
+  type: string;
+  trigger: (prevState: Partial<T>, payload: T) => T;
+}
+
+export interface ISubscriber<T> {
+  type: string;
+  trigger: (data: Partial<T>) => void;
+}
+
+export interface IQueue<T> {
+  subscribers: ISubscriber<T>[];
+  reducers: IReducer<T>[];
+  actions: IAction<T>[];
+  state: Partial<T>;
+  ref?: IQueue<T>;
 }

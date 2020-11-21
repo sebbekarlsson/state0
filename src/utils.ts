@@ -37,3 +37,8 @@ export const resolveObjectPath = (path: string, obj: any, separator = "/") =>
     (prev, curr) => prev && prev[curr],
     obj
   );
+
+export const uniqueByKey = <T>(
+  arr: (T & { [x: string]: any })[],
+  key: string | number
+) => [...Array.from(new Map(arr.map((item) => [item[key], item])).values())];
