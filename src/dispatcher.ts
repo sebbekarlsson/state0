@@ -1,6 +1,21 @@
 import { TStateEvent, FThen } from "./types";
 
+const checkPath = (stateEvent: string) => {
+  if (!stateEvent) {
+    throw new Error("Cannot pass an empty stateEvent / path");
+  }
+
+  if (!stateEvent.includes("/")) {
+    throw new Error("stateEvent / path needs at least one level of depth.");
+  }
+
+  if (stateEvent[stateEvent.length - 1] === "/") {
+    throw new Error("stateEvent / path cannot end with `/`");
+  }
+};
+
 const getPathElements = (stateEvent: string): string[] => {
+  checkPath(stateEvent);
   return stateEvent.split("/");
 };
 
@@ -36,6 +51,8 @@ export class Dispatcher<T> {
   }
 
   when(stateEvent: TStateEvent, then: FThen) {
+    checkPath(stateEvent);
+
     this.listeners[stateEvent] = [
       ...(stateEvent in this.listeners ? this.listeners[stateEvent] || [] : []),
       then,
@@ -44,6 +61,8 @@ export class Dispatcher<T> {
   }
 
   on(stateEvent: TStateEvent, then: FThen) {
+    checkPath(stateEvent);
+
     this.ons[stateEvent] = [
       ...(stateEvent in this.ons ? this.ons[stateEvent] || [] : []),
       then,
@@ -52,6 +71,8 @@ export class Dispatcher<T> {
   }
 
   emit(stateEvent: TStateEvent, payload: Partial<T>) {
+    checkPath(stateEvent);
+
     const pathElements = getPathElements(stateEvent);
 
     this.nextState =
@@ -112,6 +133,8 @@ export class Dispatcher<T> {
   }
 
   search(path: string) {
+    checkPath(path);
+
     const parts = path.split("/");
     return resolveObjectPath(
       parts.slice(0, parts.length - 1).join("/"),
@@ -121,6 +144,8 @@ export class Dispatcher<T> {
   }
 
   setInitialState(path: string, state: any) {
+    checkPath(path);
+
     this.prevState[path] = state;
     this.emit(`${path}/init`, state);
   }
