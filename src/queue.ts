@@ -1,9 +1,6 @@
 import { IReducer, IAction, ISubscriber, IQueue, IStateRecord } from "./types";
 import { safeGet, uniqueByKey } from "./utils";
-import {
-  STATE0_DEBUG_LOCALSTORAGE_ACTIONS,
-  STATE0_QUEUE_SUBSCRIBE_ACTION_TYPE,
-} from "./constants";
+import { STATE0_QUEUE_SUBSCRIBE_ACTION_TYPE } from "./constants";
 
 export const makeQueue = <T>(
   state: IStateRecord<T>,
@@ -15,27 +12,6 @@ export const makeQueue = <T>(
   subscribers,
   actions: [],
 });
-
-export const queueStart = <T>(
-  queue: IQueue<T>,
-  debug: boolean = false,
-  timeOut: number = 6
-): Promise<IQueue<T>> => {
-  queueInitLocalStorage(queue);
-
-  if (debug && window) {
-    // @ts-ignore
-    window.state0 = queue;
-  }
-
-  return new Promise((resolve, reject) => {
-    if (setInterval) {
-      setInterval(() => queuePoll<T>(queue), timeOut);
-    } else {
-      reject(new Error("Cannot create event loop"));
-    }
-  });
-};
 
 export const queueGetReducersForAction = <T>(
   queue: IQueue<T>,
@@ -49,38 +25,7 @@ export const queueGetSubscribersForAction = <T>(
 ): ISubscriber<T>[] =>
   queue.subscribers.filter((reducer) => reducer.type === action.type);
 
-export const queueInitLocalStorage = <T>(
-  queue: IQueue<T>,
-  encoder = JSON.stringify,
-  actions: IAction<T>[] = []
-): void => {
-  if (window) {
-    if (!window.localStorage.getItem(STATE0_DEBUG_LOCALSTORAGE_ACTIONS)) {
-      window.localStorage.setItem(
-        STATE0_DEBUG_LOCALSTORAGE_ACTIONS,
-        encoder(actions)
-      );
-    }
-  }
-};
-
-export const queuePushActionToStorage = <T>(
-  queue: IQueue<T>,
-  action: IAction<T>,
-  encoder = JSON.stringify,
-  decoder = JSON.parse
-): void => {
-  if (window) {
-    queueInitLocalStorage(queue, encoder, [
-      ...(decoder(
-        window.localStorage.getItem(STATE0_DEBUG_LOCALSTORAGE_ACTIONS)
-      ) as IAction<T>[]),
-      action,
-    ]);
-  }
-};
-
-export const queuePoll = <T>(queue: IQueue<T>) => {
+export const queueNext = <T>(queue: IQueue<T>) => {
   const actions = [...queue.actions];
   const action = actions.pop();
   queue.actions = actions;
@@ -98,17 +43,11 @@ export const queueGetStateRoot = <T>(
 export const queueHandleAction = <T>(queue: IQueue<T>, action: IAction<T>) => {
   if (!action) return;
 
-  queuePushActionToStorage(queue, action);
-
   if (action.type == STATE0_QUEUE_SUBSCRIBE_ACTION_TYPE && action.subscriber) {
     queue.subscribers = uniqueByKey(
       [...queue.subscribers, action.subscriber],
       "id"
-    ).map((subscriber) => {
-      // send existing data to subscribers.
-      subscriber.trigger(queueGetStateRoot(queue, subscriber.root));
-      return subscriber;
-    });
+    );
 
     return;
   }
@@ -135,8 +74,11 @@ export const queueHandleAction = <T>(queue: IQueue<T>, action: IAction<T>) => {
   queue.state.push(nextState);
 };
 
-export const queueDispatch = <T>(queue: IQueue<T>, action: IAction<T>) =>
-  (queue.actions = [...queue.actions, action]);
+export const queueDispatch = <T>(queue: IQueue<T>, action: IAction<T>) => {
+  const newActions = (queue.actions = [...queue.actions, action]);
+  queueNext(queue);
+  return newActions;
+};
 
 export const queueSubscribe = <T>(
   queue: IQueue<T>,

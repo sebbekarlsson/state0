@@ -16,8 +16,7 @@ import {
   IQueue,
   IStateRecord,
   makeQueue,
-  queueDispatch,
-  queueStart,
+  queueDispatch
 } from "state0";
 
 const CLICK_ACTION = "CLICK_ACTION";
@@ -65,9 +64,6 @@ const queue = makeQueue<IClickState>(
   [clickReducer],
   [clickSubscriber]
 );
-
-// start our queue
-queueStart(queue);
 
 // simulate some clicks
 simulateClick(queue);
