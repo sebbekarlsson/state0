@@ -42,3 +42,9 @@ export const uniqueByKey = <T>(
   arr: (T & { [x: string]: any })[],
   key: string | number
 ) => [...Array.from(new Map(arr.map((item) => [item[key], item])).values())];
+
+export const safeGet = <T, K>(
+  obj: { [x: string]: any },
+  key: string,
+  fallback: K
+): T | K => (key in obj ? obj[key] : fallback);

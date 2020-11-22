@@ -20,9 +20,6 @@ const AppComponent: FC<IAppProps> = ({ amount }): JSX.Element => {
     });
   };
 
-  const state = queue.state;
-  const raw = useMemo(() => state && prettyFormat(queue), [state]);
-
   return (
     <div className="wrapper">
       <section>
@@ -31,21 +28,17 @@ const AppComponent: FC<IAppProps> = ({ amount }): JSX.Element => {
       <section>
         <p>You have pressed me {amount} times.</p>
       </section>
-      {raw && (
-        <section>
-          <i
-            style={{ marginTop: "1rem", display: "block", fontSize: "0.8rem" }}
-          >
-            What it looks like inside
-          </i>
-          <pre className="textarea">{raw}</pre>
-        </section>
-      )}
     </div>
   );
 };
 
-export const App = withState0(queue, AppComponent, ACTION_CLICK_INCREASE);
+export const App = withState0(AppComponent, [
+  {
+    root: REDUCER_CLICK_ROOT,
+    type: ACTION_CLICK_INCREASE,
+    id: "clickComponent",
+  },
+]);
 ```
 
 > Obviously there is more to it than what meets the eyes here.  
@@ -54,25 +47,52 @@ export const App = withState0(queue, AppComponent, ACTION_CLICK_INCREASE);
 
 ```typescript
 import React, { FC, useState } from "react";
-import { queueSubscribe, IQueue } from "state0";
-import { IAppProps, IToastState } from "../types"; // you have to change these
+import { queueSubscribe, ISubscriber, queueGetStateRoot } from "state0";
+import { queue } from "."; // import queue singleton created by makeQueue
 
 export const withState0 = (
-  queue: IQueue<IAppProps | IToastState>,
   Component: FC<any>,
-  path: string
+  subscribers: Partial<ISubscriber<any>>[]
 ) => {
-  const ComponentWrapper: FC<any> = (): JSX.Element => {
-    const [props, setProps] = useState({});
-    const subscriber = (data: any) => {
-      setProps({ ...props, ...data });
+  const ComponentWrapperX: FC<any> = (): JSX.Element => {
+    const [props, setProps] = useState({
+      ...subscribers
+        .reduce((prev, subscriber) => [...prev, subscriber.root], [])
+        .reduce(
+          (prev, root) => ({
+            ...prev,
+            ...queueGetStateRoot(queue, root),
+          }),
+          {}
+        ),
+    });
+    const roots: string[] = subscribers.reduce((prev, subscriber) => {
+      queueSubscribe(queue, {
+        type: subscriber.type,
+        id: subscriber.id,
+        trigger: (data) => {
+          setProps(data);
+          Component.defaultProps = data;
+        },
+        root: subscriber.root,
+      });
+      return [...prev, subscriber.root];
+    }, []);
+
+    Component.defaultProps = {
+      ...(Component.defaultProps || {}),
+      ...roots.reduce(
+        (prev, root) => ({
+          ...prev,
+          ...queueGetStateRoot(queue, root),
+        }),
+        {}
+      ),
     };
-    queueSubscribe(queue, [{ type: path, trigger: subscriber }]);
     Component.defaultProps = props;
     return <Component props={props} />;
   };
-
-  return ComponentWrapper;
+  return ComponentWrapperX;
 };
 ```
 

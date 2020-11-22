@@ -4,35 +4,51 @@
 </p>  
   
 <p align="center" style='text-align: center; width: 100%;'>
-  The ignorant state management library
+  The ignorant queue-based state management library
 </p>
 
 ## Example
 
-> Minimal example for how to use `state0`  
+> Minimal example for how to use `state0`
 
 ```typescript
-import { IQueue, makeQueue, queueDispatch } from "state0";
+import {
+  IQueue,
+  IStateRecord,
+  makeQueue,
+  queueDispatch,
+  queueStart,
+} from "state0";
 
 const CLICK_ACTION = "CLICK_ACTION";
+const CLICK_ROOT = "click";
 
 export interface IClickState {
   amount: number;
 }
 
-export const initialState: IClickState = {
-  amount: 0,
+// Our initial state
+export const initialState: IStateRecord<IClickState> = {
+  [CLICK_ROOT]: {
+    amount: 0,
+  },
 };
 
+// read-only subscriber.
+// a good place to trigger toast notifications etc.
 export const clickSubscriber = {
   type: CLICK_ACTION,
+  root: CLICK_ROOT,
+  id: "onClick",
   trigger: (data: IClickState) => {
     console.log(`Just received some data ${data}`);
   },
 };
 
+// read / write reducer
 export const clickReducer = {
   type: CLICK_ACTION,
+  root: CLICK_ROOT,
   trigger: (prevState: IClickState, nextState: IClickState): IClickState => {
     return { amount: prevState.amount + nextState.amount };
   },
@@ -45,16 +61,19 @@ const simulateClick = (queue: IQueue<IClickState>) =>
   });
 
 const queue = makeQueue<IClickState>(
-  [clickReducer],
   initialState,
-  [],
+  [clickReducer],
   [clickSubscriber]
 );
 
-simulateClick(queue); // { amount: 1 }
-simulateClick(queue); // { amount: 2 }
-simulateClick(queue); // { amount: 3 }
-simulateClick(queue); // { amount: 4 }
+// start our queue
+queueStart(queue);
+
+// simulate some clicks
+simulateClick(queue);
+simulateClick(queue);
+simulateClick(queue);
+simulateClick(queue);
 ```
 
 ## Using it with React
@@ -80,5 +99,5 @@ npm install state0
 > Then you are ready to use it:
 
 ```typescript
-import { Dispatcher } from "state0";
+import { makeQueue } from "state0";
 ```

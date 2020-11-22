@@ -19,3 +19,6 @@ export declare const uniqueByKey: <T>(arr: (T & {
 })[], key: string | number) => (T & {
     [x: string]: any;
 })[];
+export declare const safeGet: <T, K>(obj: {
+    [x: string]: any;
+}, key: string, fallback: K) => T | K;

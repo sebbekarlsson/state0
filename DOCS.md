@@ -1,22 +1,30 @@
 # state0 documentation
 
-> Note, the `IAppProps` type / interface used in these examples are only  
-> for demonstrational purposes.  
-> You should use your own type definitions for these generics.
-
 ## Queue
 
-> To create the queue, use `makeQueue<T>(reducers: IReducer[], initialState:T, actions: IAction[], subscriber: ISubscriber[])`  
-> Note that the `actions` should usually be passed as empty `[]`, it is only for rare occations  
-> when you want to initialize the queue with some initial actions (very rarely).
+> To create the queue, use:
+
+```typescript
+makeQueue<T>(
+  state: IStateRecord<T>,
+  reducers: IReducer<T>[],
+  subscribers: ISubscriber<T>[] = []
+)
+```
+
+> Example:
 
 ```typescript
 import { queue } from "state0";
 
-// instead of "any", you can use your own type / interface.
+// instead of "IClickState", you can use your own type / interface.
 // For example, maybe your dispatcher takes care of multiple states,
-// you can use (IUserState | INotesState | ISettingsState) instead of "any".
-export const queue = makeQueue<any>([clickReducer], initialState, [], []);
+// you can use (IUserState | INotesState | ISettingsState) instead of "IClickState".
+const queue = makeQueue<IClickState>(
+  initialState,
+  [clickReducer],
+  [clickSubscriber]
+);
 ```
 
 ## Emit / Dispatch
@@ -29,17 +37,18 @@ queueDispatch(queue, { type: ACTION_CLICK_INCREASE, payload: { amount: 1 } });
 
 ## Subscribe
 
-> To subscribe on an event, use `queueSubscribe(queue: IQueue<T>, ISubscriber<T>[])`
+> To subscribe on an event, use `queueSubscribe(queue: IQueue<T>, ISubscriber<T>)`
 
 ```typescript
 export const clickSubscriber = {
   type: CLICK_ACTION,
+  id: "mySubscriberId",
   trigger: (data: IClickState) => {
     console.log(`Just received some data ${data}`);
   },
 };
 
-queueSubscribe(queue, [clickSubscriber]);
+queueSubscribe(queue, clickSubscriber);
 ```
 
 ## Reducing
@@ -55,7 +64,11 @@ export const clickReducer = {
   },
 };
 
-export const queue = makeQueue<any>([clickReducer], initialState, [], []);
+const queue = makeQueue<IClickState>(
+  initialState,
+  [clickReducer],
+  [clickSubscriber]
+);
 ```
 
 ### Final Notes
