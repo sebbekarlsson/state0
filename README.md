@@ -12,7 +12,7 @@
 > Minimal example for how to use `state0`  
 
 ```typescript
-import { IQueue, makeQueue, queueDispatch } from "@state0";
+import { IQueue, makeQueue, queueDispatch } from "state0";
 
 const CLICK_ACTION = "CLICK_ACTION";
 
